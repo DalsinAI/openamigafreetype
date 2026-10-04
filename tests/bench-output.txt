@@ -1,0 +1,1 @@
+FTPIX glyphs_end=357 pixel0=ffffffff pixel_mid=ffffffff sum=5ff8f813
