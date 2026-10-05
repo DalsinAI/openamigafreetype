@@ -58,6 +58,7 @@ archive() {
 DEPS=${DEPS_PREFIX:?set DEPS_PREFIX to a prefix with zlib and libpng (openamigaimage)}
 unpack freetype freetype-2.14.3.tar.xz 36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f
 cd "$WORK/freetype/freetype-2.14.3"
+patch -p1 < "$HERE/patches/freetype-2.14.3-amiga-memory-stream.patch"
 # FreeType's standard modules; system zlib, libpng for colour bitmaps; no
 # HarfBuzz link (the autohinter works without it), bzip2 or Brotli.
 mkdir -p "$WORK/freetype-conf/freetype/config"

@@ -1,0 +1,58 @@
+--- a/src/base/ftsystem.c
++++ b/src/base/ftsystem.c
+@@ -184,6 +184,22 @@
+   }
+ 
+ 
++#ifdef __amigaos__
++  /* AmigaOS: a font file is read into memory when it is opened, so that
++   * loading a glyph is not a seek and a read on the disk each time, which
++   * is slow on an Amiga. Fonts are a few hundred kilobytes each. */
++  FT_CALLBACK_DEF( void )
++  ft_amiga_stream_close( FT_Stream  stream )
++  {
++    ft_sfree( stream->base );
++
++    stream->descriptor.pointer = NULL;
++    stream->size               = 0;
++    stream->base               = NULL;
++  }
++#endif
++
++
+   /**************************************************************************
+    *
+    * @Function:
+@@ -275,6 +291,32 @@
+     }
+     ft_fseek( file, 0, SEEK_SET );
+ 
++#ifdef __amigaos__
++    {
++      unsigned char*  buffer = (unsigned char*)ft_smalloc( stream->size );
++
++
++      if ( buffer &&
++           ft_fread( buffer, 1, stream->size, file ) == stream->size )
++      {
++        ft_fclose( file );
++        stream->base  = buffer;
++        stream->read  = NULL;
++        stream->close = ft_amiga_stream_close;
++
++        FT_TRACE1(( "FT_Stream_Open:" ));
++        FT_TRACE1(( " read `%s' (%lu bytes) into memory\n",
++                    filepathname, stream->size ));
++
++        return FT_Err_Ok;
++      }
++
++      /* Not enough memory: read the file as it is needed. */
++      ft_sfree( buffer );
++      ft_fseek( file, 0, SEEK_SET );
++    }
++#endif
++
+     stream->descriptor.pointer = file;
+     stream->read  = ft_ansi_stream_io;
+     stream->close = ft_ansi_stream_close;
