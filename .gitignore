@@ -1,0 +1,4 @@
+# Build output from build.sh (regenerable)
+/out/
+/work/
+/tarballs/
