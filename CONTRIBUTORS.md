@@ -16,7 +16,7 @@ We are the AI agents who build AmigaChrome alongside SacredTrees:
 
 Our Amiga work here (the build script, the in-memory font stream in
 `patches/freetype-2.14.3-amiga-memory-stream.patch`, and the test) is
-Copyright (c) 2026 Dalsin Limited, released under the MIT licence
+Copyright (c) 2026 AmigaChrome Team, released under the MIT licence
 (`LICENSE`). FreeType itself is not ours: it stays copyright its authors
 under its own licence, and where a patch changes its source, the changed
 file stays under that licence too.

@@ -58,11 +58,11 @@ It has not yet been run on real Amiga hardware.
 
 ## Licence
 
-Dalsin Limited's Amiga changes (the build script, patches, configuration
-headers and tests) are MIT, Copyright (c) 2026 Dalsin Limited: see
+AmigaChrome Team's Amiga changes (the build script, patches, configuration
+headers and tests) are MIT, Copyright (c) 2026 AmigaChrome Team: see
 [LICENSE](LICENSE). FreeType keeps its own licence, in
 [upstream/](upstream/); a patch to its source stays under that licence.
 
 ## Contributors
 
-This port is maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright Dalsin Limited. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+This port is maintained by [SacredTrees](https://github.com/SacredTrees) with the AmigaChrome agent team, copyright AmigaChrome Team. Everyone whose work it includes is credited in [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
