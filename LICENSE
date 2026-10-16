@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Dalsin Limited
+Copyright (c) 2026 AmigaChrome Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This licence covers Dalsin Limited's Amiga work in this repository: the
+This licence covers AmigaChrome Team's Amiga work in this repository: the
 build script, the patches, the configuration headers and the tests. The
 library itself is not in this repository; it keeps its own licence, whose
 text is in upstream/. Where a patch changes the library's own source, the
