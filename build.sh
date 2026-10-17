@@ -1,5 +1,5 @@
 #!/bin/sh
-# openamigafreetype: FreeType, built for AmigaOS 3.x (68020 + FPU) with the
+# openamigafreetype: FreeType, built for AmigaOS 3.x (68040 + FPU) with the
 # os32-gcc16 compiler (bebbo's amiga-gcc, GCC 16.2, libnix, libpthread).
 # MIT, Copyright (c) 2026 AmigaChrome Team. The library keeps its own licence.
 #
@@ -22,7 +22,7 @@ WORK="$HERE/work"
 CC="$P/bin/m68k-amigaos-gcc"
 CXX="$P/bin/m68k-amigaos-g++"
 AR="$P/bin/m68k-amigaos-ar"
-CPU=${OS32_CPU_FLAGS:-"-m68020 -m68881 -mcrt=nix20"}
+CPU=${OS32_CPU_FLAGS:-"-m68040 -m68881 -mcrt=nix20"}
 CFLAGS="-O2 $CPU -fno-delete-null-pointer-checks -D_DEFAULT_SOURCE=1 -D_POSIX_TIMERS=1 -D_POSIX_REALTIME_SIGNALS=1 -fno-common"
 mkdir -p "$OUT/include" "$OUT/lib" "$WORK"
 
