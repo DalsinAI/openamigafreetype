@@ -37,6 +37,9 @@ tarballs from [SOURCES](SOURCES) in `tarballs/`. Then:
 The libraries and headers land in `out/` (set `PREFIX` to change that). The
 script prints which other settings it needs, if any. Target: the 68040
 with an FPU (`-m68040 -m68881`), libnix (`-mcrt=nix20`).
+It needs a 68040 with an FPU (a full 68040, not an LC or EC040): the
+browser stack stays hard float for now, so programs that link it are built
+with `-m68881` too.
 
 Link with: `-lfreetype -lpng -lz`
 
