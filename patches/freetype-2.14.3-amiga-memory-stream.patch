@@ -1,13 +1,40 @@
 --- a/src/base/ftsystem.c
 +++ b/src/base/ftsystem.c
-@@ -184,6 +184,22 @@
+@@ -184,6 +184,165 @@
    }
  
  
 +#ifdef __amigaos__
-+  /* AmigaOS: a font file is read into memory when it is opened, so that
-+   * loading a glyph is not a seek and a read on the disk each time, which
-+   * is slow on an Amiga. Fonts are a few hundred kilobytes each. */
++  /* AmigaOS: seeking and reading the disk for every glyph is slow, so  */
++  /* a font file of up to FT_AMIGA_WHOLE_MAX bytes is read into memory  */
++  /* when it is opened.  A bigger file (a CJK font is 10 to 20 MB) is   */
++  /* read as it is needed, through a cache of FT_AMIGA_BLOCKS blocks of */
++  /* FT_AMIGA_BLOCK bytes each (256 KB in all), so that each face does  */
++  /* not hold the whole file in memory.                                 */
++#ifndef FT_AMIGA_WHOLE_MAX
++#define FT_AMIGA_WHOLE_MAX  ( 1024UL * 1024UL )
++#endif
++#ifndef FT_AMIGA_BLOCK
++#define FT_AMIGA_BLOCK      4096UL
++#endif
++#ifndef FT_AMIGA_BLOCKS
++#define FT_AMIGA_BLOCKS     64
++#endif
++
++  typedef struct  FT_AmigaCache_
++  {
++    FT_FILE*        file;
++    unsigned long   filepos;                      /* where the file is   */
++    unsigned long   clock;
++    int             last;                         /* last block used     */
++    unsigned long   start[FT_AMIGA_BLOCKS];       /* offset of a block   */
++    unsigned long   len[FT_AMIGA_BLOCKS];         /* 0: block is empty   */
++    unsigned long   used[FT_AMIGA_BLOCKS];        /* when last used      */
++    unsigned char   data[FT_AMIGA_BLOCKS][FT_AMIGA_BLOCK];
++
++  } FT_AmigaCache;
++
++
 +  FT_CALLBACK_DEF( void )
 +  ft_amiga_stream_close( FT_Stream  stream )
 +  {
@@ -17,17 +44,134 @@
 +    stream->size               = 0;
 +    stream->base               = NULL;
 +  }
-+#endif
++
++
++  FT_CALLBACK_DEF( void )
++  ft_amiga_cache_close( FT_Stream  stream )
++  {
++    FT_AmigaCache*  cache = (FT_AmigaCache*)stream->descriptor.pointer;
++
++
++    ft_fclose( cache->file );
++    ft_sfree( cache );
++
++    stream->descriptor.pointer = NULL;
++    stream->size               = 0;
++    stream->base               = NULL;
++  }
++
++
++  /* Read `count' bytes at `offset' straight from the file. */
++  static unsigned long
++  ft_amiga_file_read( FT_AmigaCache*  cache,
++                      unsigned long   offset,
++                      unsigned char*  buffer,
++                      unsigned long   count )
++  {
++    unsigned long  got;
++
++
++    if ( cache->filepos != offset &&
++         ft_fseek( cache->file, (long)offset, SEEK_SET ) )
++    {
++      cache->filepos = ~0UL;
++      return 0;
++    }
++
++    got            = (unsigned long)ft_fread( buffer, 1, count, cache->file );
++    cache->filepos = offset + got;
++
++    return got;
++  }
++
++
++  FT_CALLBACK_DEF( unsigned long )
++  ft_amiga_cache_io( FT_Stream       stream,
++                     unsigned long   offset,
++                     unsigned char*  buffer,
++                     unsigned long   count )
++  {
++    FT_AmigaCache*  cache = (FT_AmigaCache*)stream->descriptor.pointer;
++    unsigned long   done  = 0;
++
++
++    if ( offset > stream->size )
++      return count ? 0 : 1;
++
++    if ( count > stream->size - offset )
++      count = stream->size - offset;
++
++    /* A read of a block or more (a whole table) goes straight to the */
++    /* file; the cache is for the many small reads of glyph loading.  */
++    if ( count >= FT_AMIGA_BLOCK )
++      return ft_amiga_file_read( cache, offset, buffer, count );
++
++    while ( done < count )
++    {
++      unsigned long  pos   = offset + done;
++      unsigned long  start = pos - pos % FT_AMIGA_BLOCK;
++      unsigned long  take;
++      int            i, slot = cache->last;
++
++
++      if ( cache->len[slot] && cache->start[slot] == start )
++        i = slot;
++      else
++      {
++        slot = 0;
++        for ( i = 0; i < FT_AMIGA_BLOCKS; i++ )
++        {
++          if ( cache->len[i] && cache->start[i] == start )
++            break;
++          if ( cache->used[i] < cache->used[slot] )
++            slot = i;
++        }
++      }
++
++      if ( i < FT_AMIGA_BLOCKS )
++        slot = i;
++      else
++      {
++        unsigned long  want = stream->size - start;
++
++
++        if ( want > FT_AMIGA_BLOCK )
++          want = FT_AMIGA_BLOCK;
++
++        cache->start[slot] = start;
++        cache->len[slot]   = ft_amiga_file_read( cache, start,
++                                                 cache->data[slot],
++                                                 want );
++      }
++
++      cache->used[slot] = ++cache->clock;
++      cache->last       = slot;
++
++      if ( pos - start >= cache->len[slot] )
++        break;                                     /* a short read */
++
++      take = cache->len[slot] - ( pos - start );
++      if ( take > count - done )
++        take = count - done;
++
++      ft_memcpy( buffer + done, cache->data[slot] + ( pos - start ), take );
++      done += take;
++    }
++
++    return done;
++  }
++#endif /* __amigaos__ */
 +
 +
    /**************************************************************************
     *
     * @Function:
-@@ -275,6 +291,32 @@
+@@ -275,6 +434,65 @@
      }
      ft_fseek( file, 0, SEEK_SET );
  
 +#ifdef __amigaos__
++    if ( stream->size <= FT_AMIGA_WHOLE_MAX )
 +    {
 +      unsigned char*  buffer = (unsigned char*)ft_smalloc( stream->size );
 +
@@ -50,6 +194,38 @@
 +      /* Not enough memory: read the file as it is needed. */
 +      ft_sfree( buffer );
 +      ft_fseek( file, 0, SEEK_SET );
++    }
++
++    {
++      FT_AmigaCache*  cache = (FT_AmigaCache*)ft_smalloc( sizeof ( *cache ) );
++
++
++      if ( cache )
++      {
++        int  i;
++
++
++        cache->file    = file;
++        cache->filepos = 0;
++        cache->clock   = 0;
++        cache->last    = 0;
++        for ( i = 0; i < FT_AMIGA_BLOCKS; i++ )
++        {
++          cache->start[i] = 0;
++          cache->len[i]   = 0;
++          cache->used[i]  = 0;
++        }
++
++        stream->descriptor.pointer = cache;
++        stream->read  = ft_amiga_cache_io;
++        stream->close = ft_amiga_cache_close;
++
++        FT_TRACE1(( "FT_Stream_Open:" ));
++        FT_TRACE1(( " opened `%s' (%lu bytes), read through a cache\n",
++                    filepathname, stream->size ));
++
++        return FT_Err_Ok;
++      }
 +    }
 +#endif
 +

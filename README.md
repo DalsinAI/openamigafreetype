@@ -21,7 +21,7 @@ for the library goes to its authors; see `upstream/` for their notices.
 
 ## What the Amiga port changes
 
-- **Fonts are read into memory** (`patches/freetype-2.14.3-amiga-memory-stream.patch`, in `src/base/ftsystem.c`): a font file is read whole when it is opened, so loading a glyph is not a seek and a read on the disk each time. Before, a page's first text took long enough that OpenBrowser's window sat at 31% while it was laid out. If there is not enough memory the file is read as it is needed, as before.
+- **Fonts are read into memory, or through a cache** (`patches/freetype-2.14.3-amiga-memory-stream.patch`, in `src/base/ftsystem.c`): a font file of up to 1 MB is read whole when it is opened, so loading a glyph is not a seek and a read on the disk each time. Before, a page's first text took long enough that OpenBrowser's window sat at 31% while it was laid out. A bigger file (a CJK font is 10 to 20 MB) is read as it is needed, through a cache of 64 blocks of 4 KB (256 KB) for each face, so a face no longer holds the whole file in memory. If there is not enough memory for either, the file is read as it is needed with no cache, as upstream does.
 - `ftoption.h` turns on the system zlib and libpng (colour bitmap glyphs).
 
 ## Building
