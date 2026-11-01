@@ -4,7 +4,7 @@
 # MIT, Copyright (c) 2026 AmigaChrome Team. The library keeps its own licence.
 #
 #   OS32_GCC16   compiler root holding prefix/ and compat/
-#                (default ~/AmigaChrome/stoves/os32-gcc16)
+#                (default ~/AmiCradle/stoves/os32-gcc16)
 #   PREFIX       where include/ and lib/ go (default ./out)
 #   TARBALLS     folder holding the upstream tarballs listed in SOURCES
 #                (default ./tarballs); the script checks their SHA-256
@@ -13,7 +13,7 @@
 # usage: ./build.sh
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-S=${OS32_GCC16:-"$HOME/AmigaChrome/stoves/os32-gcc16"}
+S=${OS32_GCC16:-"$HOME/AmiCradle/stoves/os32-gcc16"}
 P=$S/prefix
 OUT=${PREFIX:-"$HERE/out"}
 TARBALLS=${TARBALLS:-"$HERE/tarballs"}
