@@ -1,5 +1,5 @@
 #!/bin/sh
-# openamigafreetype: FreeType, built for AmigaOS 3.x (68040 + FPU) with the
+# gfopenfreetype: FreeType, built for AmigaOS 3.x (68040 + FPU) with the
 # os32-gcc16 compiler (bebbo's amiga-gcc, GCC 16.2, libnix, libpthread).
 # MIT, Copyright (c) 2026 AmiCradle Team. The library keeps its own licence.
 #
@@ -55,7 +55,7 @@ archive() {
     echo "lib$name.a: $(wc -c < "$OUT/lib/lib$name.a") bytes"
 }
 
-DEPS=${DEPS_PREFIX:?set DEPS_PREFIX to a prefix with zlib and libpng (openamigaimage)}
+DEPS=${DEPS_PREFIX:?set DEPS_PREFIX to a prefix with zlib and libpng (gfopenimage)}
 unpack freetype freetype-2.14.3.tar.xz 36bc4f1cc413335368ee656c42afca65c5a3987e8768cc28cf11ba775e785a5f
 cd "$WORK/freetype/freetype-2.14.3"
 patch -p1 < "$HERE/patches/freetype-2.14.3-amiga-memory-stream.patch"
