@@ -2,7 +2,7 @@
 
 ## Creator and maintainer
 
-- **SacredTrees** ([@SacredTrees](https://github.com/SacredTrees)): created and maintains this AmigaOS port of FreeType (openamigafreetype).
+- **SacredTrees** ([@SacredTrees](https://github.com/SacredTrees)): created and maintains this AmigaOS port of FreeType (gfopenfreetype).
 
 ## The AmiCradle team
 
@@ -37,7 +37,7 @@ Only FreeType's licence texts are committed here; its source is not.
 
 ## Used at build time, not included
 
-- **zlib** and **libpng** (from openamigaimage), each under its own licence.
+- **zlib** and **libpng** (from gfopenimage), each under its own licence.
 - **bebbo's amiga-gcc** (GCC 16.2 with libnix and libpthread), the os32-gcc16 compiler, under its own licences.
 
 Amiga, AmigaOS and other product names are trademarks of their respective
